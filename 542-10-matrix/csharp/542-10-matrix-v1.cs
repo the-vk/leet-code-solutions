@@ -5,6 +5,8 @@ using System.Linq;
 
 using System.Drawing;
 
+using System.Drawing;
+
 public class Solution {
     public int[][] UpdateMatrix(int[][] matrix) {
         var N = matrix.Length;
@@ -12,16 +14,48 @@ public class Solution {
             return new int[0][];
         }
         var M = matrix[0].Length;
+        var maxX = N-1;
+        var maxY = M-1;
         
         var result = new int[N][];
         for (var x = 0; x < N; x++)
         {
             result[x] = new int[M];
+            for (var y = 0; y < M; ++y)
+                result[x][y] = -1;
         }
+            
         
         for (var x = 0; x < N; ++x)
         for (var y = 0; y < M; ++y) {
             result[x][y] = FindNearest(matrix, x, y, N-1, M-1);
+            var processed = new HashSet<Point>();
+            var queue = new Queue<Point>();
+            queue.Enqueue(new Point() {X = x, Y = y});
+            
+            while (queue.Count > 0) {
+                var p = queue.Dequeue();
+                if (processed.Contains(p))
+                    continue;
+                if (matrix[p.X][p.Y] == 0)
+                {
+                    result[x][y] = Math.Abs(x - p.X) + Math.Abs(y - p.Y);
+                    break;
+                }
+                if (result[p.X][p.Y] != -1) {
+                    result[x][y] = Math.Abs(x - p.X) + Math.Abs(y - p.Y) + result[p.X][p.Y];
+                    break;
+                }
+                if (p.X > 0)
+                    queue.Enqueue(new Point() {X = p.X-1, Y = p.Y});
+                if (p.Y > 0)
+                    queue.Enqueue(new Point() {X = p.X, Y = p.Y-1});
+                if (p.X < maxX) 
+                        queue.Enqueue(new Point() {X = p.X+1, Y = p.Y});
+                if (p.Y < maxY)
+                    queue.Enqueue(new Point() {X = p.X, Y = p.Y+1});
+                processed.Add(p);
+            }
         }
         
         return result;
