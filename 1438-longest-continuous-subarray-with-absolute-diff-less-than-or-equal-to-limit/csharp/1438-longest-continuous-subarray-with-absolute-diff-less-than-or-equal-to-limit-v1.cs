@@ -6,50 +6,38 @@ using System.Text;
 public class Solution {
     public int LongestSubarray(int[] nums, int limit) {
         if (nums.Length == 0) return 0;
+        var minQueue = new LinkedList<int>();
+        var maxQueue = new LinkedList<int>();
         
-        var seen = new Dictionary<int, int>();
         var left = 0;
         var right = 0;
-        var maxAns = 0;  
         
-        seen[nums[0]] = 1;
+        var ans = 0;
         
-        while (true) {
-            var (min, max) = MinMax(seen.Keys);
+        while (right < nums.Length) {
+            var n = nums[right];
             
-            if (max-min <= limit) {
-                maxAns = Math.Max(maxAns, right-left+1);
-                right++;
-                if (right == nums.Length) break;
-                if (seen.ContainsKey(nums[right])) {
-                    seen[nums[right]] += 1;
-                } else {
-                    seen[nums[right]] = 1;
-                }
-            } else {
-                seen[nums[left]] -= 1;
-                if (seen[nums[left]] == 0) {
-                    seen.Remove(nums[left]);
-                }
+            while (maxQueue.Last?.Value > n) {
+                maxQueue.RemoveLast();
+            }
+            while (minQueue.Last?.Value < n) {
+                minQueue.RemoveLast();
+            }
+            
+            minQueue.AddLast(n);
+            maxQueue.AddLast(n);
+            
+            if (Math.Abs(minQueue.First.Value - maxQueue.First.Value) > limit) {
+                if (maxQueue.First.Value == nums[left]) maxQueue.RemoveFirst();
+                if (minQueue.First.Value == nums[left]) minQueue.RemoveFirst();
                 left++;
             }
+            right++;
+            ans = Math.Max(ans, right-left);
         }
         
-        return maxAns;
-    }
-    
-    (int, int) MinMax(IEnumerable<int> seq) {
-        int? min = null;
-        int? max = null;
-        foreach (var x in seq) {
-            if (min == null && max == null) {
-                min = max = x;
-            } else {
-                min = Math.Min(min.Value, x);
-                max = Math.Max(max.Value, x);
-            }
-        }
-        return (min ?? 0, max ?? 0);
+        
+        return ans;
     }
 }
 
