@@ -6,33 +6,36 @@ using System.Linq;
 using System.Drawing;
 
 public class Solution {
-    public int MaximumSwap(int num) {
-        var digits = new List<int>();
-        while (num > 0) {
-            digits.Add(num % 10);
-            num /= 10;
+    public int MaximalNetworkRank(int n, int[][] roads) {
+        if (n == 0) return 0;
+        
+        var cityRank = new int[n];
+        var ajm = new bool[n][];
+        
+        for (var i = 0; i < n; ++i) {
+            ajm[i] = new bool[n];
         }
-        var digitsSorted = digits.OrderBy(x => x).ToList();
-        for (var i = digits.Count - 1; i >= 0; --i) {
-            if (digits[i] != digitsSorted[i]) {
-                for (var j = 0; j < i; j++) {
-                    if (digits[j] == digitsSorted[i]) {
-                        var t = digits[i];
-                        digits[i] = digits[j];
-                        digits[j] = t;
-                        break;
-                    }
-                }
-                break;
+        
+        foreach (var r in roads)
+        {
+            var f = r[0];
+            var t = r[1];
+            ajm[f][t] = true;
+            ajm[t][f] = true;
+            cityRank[f] += 1;
+            cityRank[t] += 1;
+        }
+
+        var networkRank = 0;
+        for (var i = 0; i < n; ++i) {
+            for (var j = i+1; j < n; ++j) {
+                var pairRank = cityRank[i] + cityRank[j];
+                if (ajm[i][j]) pairRank -= 1;
+                networkRank = Math.Max(networkRank, pairRank);
             }
         }
-        num = 0;
-        digits.Reverse();
-        foreach (var d in digits) {
-            num *= 10;
-            num += d;
-        }
-        return num;
+        
+        return networkRank;
     }
 }
 
@@ -40,14 +43,14 @@ public static class Program
 {
     public static void Main()
     {
-        Test(7326, 2376);
+        Test(5, 5, new int[][] { new int[] {0,1}, new int[] {1,2}, new int[] {2,3}, new int[] {2,4}, new int[] {5,6}, new int[] {5,7} });
     }
 
-    private static void Test(int expected, int num)
+    private static void Test(int expected, int n, int[][] roads)
     {
         var solution = new Solution();
         var stopwatch = Stopwatch.StartNew();
-        var actual = solution.MaximumSwap(num);
+        var actual = solution.MaximalNetworkRank(n, roads);
         if (actual != expected)
         {
             Console.WriteLine($"actual value '{actual}' is not equal to expected value '{expected}'");
