@@ -3,10 +3,11 @@ from typing import List
 
 class Solution:
     def totalFruit(self, tree: List[int]) -> int:
+        n = len(tree)
         t1 = t2 = -1
         t1s = -1
         ans = 0;
-        for i in range(0, len(tree)):
+        for i in range(n):
             t = tree[i]
             if t != t1 and t != t2:
                 ans = max(ans, i - t1s)
@@ -15,7 +16,7 @@ class Solution:
                     t1s -= 1
                 t1 = tree[i - 1]
                 t2 = t
-        ans = max(ans, len(tree) - t1s)
+        ans = max(ans, n - t1s)
         return ans
 
 def test(tree, expected):
